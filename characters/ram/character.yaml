@@ -1,0 +1,9 @@
+name: ram
+source: "characters/Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Male_FullBody.fbx"
+target_height: 1.75
+forward: +Y            # local axis that faces the camera-forward; flip (-Y) if the preview faces away
+rig: auto
+look:
+  skin: [0.74, 0.56, 0.46]
+  clothes: {kind: shorts, shirt: [0.20, 0.50, 0.88], lower: [0.92, 0.52, 0.12], baggy: 0.045}   # blue top, orange shorts
+voice: {engine: dots, ref: nk_hi.wav, lang: hi}

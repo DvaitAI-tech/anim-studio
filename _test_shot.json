@@ -1,0 +1,19 @@
+{
+  "id": "b2_ram_enters",
+  "aspect": "16x9",
+  "fps": 30,
+  "frames": 90,
+  "engine": "eevee",
+  "samples": 48,
+  "out": "out/_shots/_test_b2.16x9.mp4",
+  "positions": {
+    "bench_seat": {"loc": [0, 0, 0], "face": 0},
+    "path":       {"loc": [4, -3, 0], "face": 200},
+    "bench_side": {"loc": [1.3, 0, 0], "face": 215}
+  },
+  "cast": [
+    {"who": "riya", "model": "assets/characters/CesiumMan.glb", "at": "bench_seat", "action": "sit_scroll_phone"},
+    {"who": "ram",  "model": "assets/characters/CesiumMan.glb", "at": "path", "action": "walk_in", "to": "bench_side"}
+  ],
+  "camera": {"shot": "wide", "on": ["riya", "ram"], "move": "push_in"}
+}

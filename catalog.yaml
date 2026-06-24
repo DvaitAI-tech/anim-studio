@@ -1,0 +1,67 @@
+# Character building blocks an AGENT picks from to assemble a character.
+# Flow: choose body + outfit + skin + voice  ->  new_character.py writes characters/<name>/character.yaml
+#       ->  build_character.py bakes it.  Keep ids STABLE; add more options freely over time.
+#
+# `outfits` are painted-clothing presets on a nude base body (until real clothed assets are added).
+# When we add real clothed/textured models, give the body `textured: true` and skip the outfit.
+
+bodies:
+  female_base:
+    source: "characters/Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Female_FullBody.fbx"
+    height: 1.66
+    desc: "Quaternius Universal female base body (nude; clothing painted via an outfit). Universal rig."
+  male_base:
+    source: "characters/Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Male_FullBody.fbx"
+    height: 1.75
+    desc: "Quaternius Universal male base body (nude; clothing painted via an outfit). Universal rig."
+
+  # --- Anime characters (VRoid Studio -> .vrm). Cute face + hair + dress, with toon textures.
+  # Make/Download the .vrm into the character folder, point `source` at it, keep `textured: true`.
+  # Needs the free 'VRM Add-on for Blender' (see docs/CHARACTER_PIPELINE.md). Example (uncomment when ready):
+  # riya_anime:
+  #   source: "characters/riya/riya.vrm"
+  #   height: 1.56            # anime proportions tend shorter
+  #   textured: true          # keep VRoid's own toon hair/skin/clothes (don't paint)
+  #   forward: -Y             # VRoid faces -Y on import; flip if the preview shows the back
+  #   desc: "Anime girl made in VRoid Studio (VRM)."
+
+# Two kinds of outfit:
+#   painted  -> flat keys {kind, shirt, lower, baggy}: color regions painted on a nude body (cheap, rough)
+#   garment  -> {mesh: "outfits/<file>.fbx"}: a REAL clothing mesh bound to the body's rig (change-clothes)
+# A garment must be skinned to the SAME rig as the body (e.g. Quaternius Modular Outfits = Universal rig).
+outfits:
+  casual_bright:
+    kind: shorts
+    shirt: [0.20, 0.50, 0.88]
+    lower: [0.92, 0.52, 0.12]
+    baggy: 0.03
+    desc: "(painted) Bright blue tee + orange shorts."
+  skirt_warm:
+    kind: skirt
+    shirt: [0.96, 0.80, 0.25]
+    lower: [0.80, 0.22, 0.38]
+    baggy: 0.03
+    desc: "(painted) Yellow top + raspberry skirt."
+
+  # --- REAL garment meshes (Quaternius Modular Outfits, CC0, Universal rig). Layer onto a base body
+  # (the base gives head + skin; the garment covers torso/arms/legs/feet). Paths are under assets/.
+  # FBX (matches the FBX body + the FBX animation library -> same axis + rest pose, no flip needed).
+  peasant_female:
+    mesh: "characters/Modular Character Outfits - Fantasy[Standard]/Exports/FBX (Unity)/Outfits/Female_Peasant.fbx"
+    oversize: 1.25      # >1 = roomier girth (width/depth only); raise/lower to taste
+    desc: "Female peasant clothing (real garment; deforms with the body). Use on female_base."
+  peasant_male:
+    mesh: "characters/Modular Character Outfits - Fantasy[Standard]/Exports/FBX (Unity)/Outfits/Male_Peasant.fbx"
+    desc: "Male peasant clothing (real garment). Use on male_base."
+  ranger_female:
+    mesh: "characters/Modular Character Outfits - Fantasy[Standard]/Exports/FBX (Unity)/Outfits/Female_Ranger.fbx"
+    desc: "Female ranger clothing (hooded/armored). Use on female_base."
+
+skins:
+  light:  [0.86, 0.68, 0.56]
+  medium: [0.74, 0.56, 0.46]
+  tan:    [0.62, 0.45, 0.34]
+
+voices:
+  nk_hindi:     {engine: dots, ref: nk_hi.wav, lang: hi}      # NK's cloned voice (male)
+  ritika_hindi: {engine: orpheus, voice: "ऋतिका", lang: hi}   # Orpheus Hindi female

@@ -1,0 +1,16 @@
+name: riya
+source: characters/Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Female_FullBody.fbx
+target_height: 1.66
+forward: +Y
+rig: auto
+look:
+  skin:
+  - 0.86
+  - 0.68
+  - 0.56
+  garment: characters/Modular Character Outfits - Fantasy[Standard]/Exports/FBX (Unity)/Outfits/Female_Peasant.fbx
+  garment_oversize: 1.25
+voice:
+  engine: orpheus
+  voice: ऋतिका
+  lang: hi

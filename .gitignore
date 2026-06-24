@@ -1,0 +1,44 @@
+# NOTE: .gitignore does NOT support trailing/inline comments — a '#' only starts
+# a comment at the START of a line. Keep every comment on its own line.
+
+# Portable Blender, if placed here
+tools/
+
+# Rendered clips + per-shot intermediates
+out/
+
+# Downloaded models / textures / motions / worlds / HDRIs (regenerable)
+assets/characters/
+assets/worlds/
+assets/props/
+assets/motions/
+assets/hdri/
+
+# Synthesized voice + voiceover audio
+voice/
+media/
+
+# Heavy / binary asset formats (catch-alls, anywhere in the tree)
+*.hdr
+*.exr
+*.glb
+*.gltf
+*.fbx
+*.blend
+*.blend1
+*.mp4
+*.wav
+*.mp3
+
+# Built character bakes — keep the recipe (character.yaml), ignore heavy outputs
+characters/*/character.blend
+characters/*/preview.png
+characters/*/character.resolved.json
+characters/*/_build.spec.json
+
+# Python
+__pycache__/
+*.pyc
+
+# Keep empty asset folders if you add placeholders
+!assets/**/.gitkeep

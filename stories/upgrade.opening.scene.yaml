@@ -1,0 +1,61 @@
+title: "The Upgrade — opening"
+fps: 30
+aspects: [16x9]        # 16:9 only for now (NK)
+music: null            # set to a music-bed path later (e.g. skill45-video uplift_bed.mp3)
+hdri: hdri/residential_garden_2k.hdr   # outdoor garden backdrop + lighting (Poly Haven, CC0)
+hdri_strength: 1.0
+
+# A wooden bench under the seats (box: [width, depth, height]). Nudged back (+Y) behind the sitters.
+bench: {loc: [0.3, 0.14, 0], size: [1.7, 0.55, 0.45], color: [0.34, 0.22, 0.12]}
+
+# Walkers face their travel direction. If a clip's "forward" isn't +Y, nudge this (try 90 / 180 / -90).
+walk_face_offset: 0
+
+# Quaternius "Universal Animation Library" (one FBX, 43 clips, same rig as the base characters).
+# motion_map turns our semantic action names into the library's clip names.
+motion_library: "characters/Universal Animation Library[Standard]/Unity/UAL1_Standard.fbx"
+motion_map:
+  sit_scroll_phone: Sitting_Idle_Loop
+  talk_gesture:     Sitting_Talking_Loop
+  walk_in:          Jog_Fwd_Loop
+  stand_curious:    Idle_Loop
+  idle:             Idle_Loop
+
+positions:
+  # face: degrees about Z. 180 = full face to camera; ~200/160 = 3/4 two-shot (both faces visible).
+  bench_seat:  {loc: [0, 0, 0],    face: 200}   # Riya seated, 3/4 toward camera
+  bench_seat2: {loc: [0.6, 0, 0],  face: 165}   # Ram seated beside Riya, angled toward her + camera
+  path:        {loc: [4, -3, 0],   face: 160}   # Ram's entry point (facing auto-set to travel dir)
+  bench_side:  {loc: [1.3, 0, 0],  face: 160}   # Ram standing beside the bench
+
+cast:
+  # `use:` pulls model + skin + clothes + voice from characters/<name>/character.yaml (a built asset).
+  # Inline keys still override. Build the assets first: python build_character.py characters/riya/character.yaml
+  riya: {use: riya}
+  ram:  {use: ram}
+
+shots:
+  - id: b1_riya_scroll
+    camera: {shot: medium, on: [riya], move: push_in}
+    cast:
+      - {who: riya, at: bench_seat, action: sit_scroll_phone}
+    seconds: 5
+
+  - id: b2_ram_enters
+    camera: {shot: wide, on: [riya, ram]}
+    cast:
+      - {who: riya, at: bench_seat, action: sit_scroll_phone}
+      - {who: ram,  at: path, action: walk_in, to: bench_side}
+    dialogue:
+      - {who: ram, line: "अरे Riya! इतने ध्यान से क्या देख रही हो? कोई web series?"}
+
+  - id: b3_reveal
+    camera: {shot: two_shot, on: [riya, ram], move: push_in}
+    cast:
+      - {who: riya, at: bench_seat,  action: talk_gesture}
+      - {who: ram,  at: bench_seat2, action: talk_gesture}   # Ram now sits beside her on the bench
+    dialogue:
+      # Riya -> Orpheus (can't read Latin): English terms written in Devanagari per Skill45 script rules.
+      - {who: riya, line: "नहीं यार… मैं अपने आप को अपग्रेड कर रही हूँ — Skill45 पर।"}
+      - {who: ram,  line: "Skill45? ये क्या नई चीज़ है?"}
+      - {who: riya, line: "सिर्फ़ पैंतालीस रुपये में — पैंतालीस दिन की लर्निंग। हर दिन तीन छोटे लेसन — टेक, करियर और फाइनेंस।"}
