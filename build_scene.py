@@ -88,12 +88,31 @@ def _cast_spec(scene, c):
     return entry
 
 
+def _face_block(shot, layout, line_dur, line_wav, fps):
+    """Per-line facial drive for this shot: frame range + amplitude envelope + emotion.
+    Frame 1 == shot t0 (render_shot renders frames 1..N), so a line at offset `off` starts at
+    round(off*fps)+1. Envelope (one value/frame) drives the mouth; emotion drives expression."""
+    dmap = {d["_idx"]: d for d in (shot.get("dialogue") or [])}
+    face = []
+    for idx, off in layout:
+        d = dmap.get(idx, {})
+        fstart = round(off * fps) + 1
+        fend = fstart + max(1, round(line_dur.get(idx, 0.0) * fps))
+        env = voices.extract_envelope(line_wav[idx], fps) if idx in line_wav else []
+        if len(env) != (fend - fstart):
+            print(f"   [face] line {idx}: envelope {len(env)} vs frames {fend - fstart}")
+        face.append({"who": d.get("who"), "frame_start": fstart, "frame_end": fend,
+                     "envelope": env, "emotion": d.get("emotion", "neutral")})
+    return face
+
+
 def render_shots(scene, manifest, aspect, fps, shots_dir):
     line_dur = {m["idx"]: m["dur"] for m in manifest}
+    line_wav = {m["idx"]: m["wav"] for m in manifest}
     positions = scene["positions"]
     shot_files, shot_secs = [], []
     for shot in scene["shots"]:
-        secs, _ = shot_layout(shot, line_dur)
+        secs, layout = shot_layout(shot, line_dur)
         shot_secs.append(secs)
         spec = {
             "id": shot["id"], "aspect": aspect, "fps": fps, "frames": round(secs * fps),
@@ -106,6 +125,7 @@ def render_shots(scene, manifest, aspect, fps, shots_dir):
             "positions": positions,
             "cast": [_cast_spec(scene, c) for c in shot["cast"]],
             "camera": shot.get("camera", {}),
+            "face": _face_block(shot, layout, line_dur, line_wav, fps),
         }
         spec_path = shots_dir / f"spec.{shot['id']}.{aspect}.json"
         spec_path.write_text(json.dumps(spec, ensure_ascii=False), encoding="utf-8")

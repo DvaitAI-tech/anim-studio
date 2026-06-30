@@ -39,7 +39,9 @@ ram:
   clothes: {kind: shorts, shirt: [0.20, 0.50, 0.88], lower: [0.92, 0.52, 0.12], baggy: 0.045}
   voice: {engine: dots, ref: nk_hi.wav, lang: hi}
 ```
-- `model` — path under `assets/`, rigged.
+- `model` — path under `assets/`, rigged. May be a **`.vrm`** (VRoid) — those keep their own
+  textures (no recolor/clothing applied) and bring mouth visemes + emotion blendshapes for the face
+  layer (M3). Needs the free *VRM Add-on for Blender* enabled.
 - `color` — skin RGB (0–1); applied where no clothing covers. Without `clothes`, the whole body is this color.
 - `clothes` — paints the body mesh into regions (no extra geometry, deforms with the pose):
   - `kind` — `skirt` (a touch longer) | `shorts`.
@@ -68,6 +70,9 @@ ram:
   2. else `assets/motions/<action>.fbx`,
   3. else the model's built-in clip / static pose (so incomplete scenes still render).
 - `dialogue[].who` → that character's `voice`; `line` is Hinglish-in-Devanagari (Orpheus/dots read it).
+- `dialogue[].emotion` — *optional* facial expression held over the line for VRM characters:
+  `happy | sad | angry | surprised | relaxed | neutral` (default `neutral`). Ignored by body-only
+  rigs. The mouth also lip-syncs to the line's audio amplitude automatically (M3 face layer).
 - **Shot duration** = `seconds` if given, else `LEAD + Σ(line dur + GAP)`, floored at `MIN_SHOT` (2.5 s).
 
 ## Notes

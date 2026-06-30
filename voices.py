@@ -45,6 +45,38 @@ def _resolve_ref(ref):
     return str(p if p.is_absolute() else (DOTS_PILOT / ref))
 
 
+def extract_envelope(wav_path, fps, gain=1.0):
+    """Per-video-frame normalized RMS amplitude (0..1) of a line's wav — crude amplitude lip-sync.
+
+    Returns one value per output frame at `fps` (loudest frame -> 1.0 -> mouth fully open). Uses
+    scipy (already a dep via synth_orpheus). Returns [] on any read failure so the caller degrades
+    to no lip-sync rather than crashing. Phoneme/viseme timing is a later upgrade that would replace
+    this function's output shape.
+    """
+    import numpy as np
+    from scipy.io import wavfile
+    try:
+        sr, data = wavfile.read(str(wav_path))
+    except Exception as e:                                   # noqa: BLE001
+        print(f"   [envelope] could not read {Path(wav_path).name}: {e}")
+        return []
+    data = np.asarray(data, dtype=np.float64)
+    if data.ndim > 1:
+        data = data.mean(axis=1)                             # to mono
+    if data.size == 0:
+        return []
+    data = data / (np.abs(data).max() or 1.0)                # int PCM -> -1..1
+    hop = max(1, int(round(sr / float(fps))))                # samples per video frame
+    nframes = int(np.ceil(len(data) / hop))
+    env = np.zeros(nframes, dtype=np.float64)
+    for i in range(nframes):
+        w = data[i * hop:(i + 1) * hop]
+        if w.size:
+            env[i] = np.sqrt(np.mean(w ** 2))
+    env = np.clip((env / (env.max() or 1.0)) * gain, 0.0, 1.0)
+    return [round(float(x), 3) for x in env]
+
+
 def collect_lines(scene):
     """Flatten scene dialogue into ordered line dicts with each speaker's voice spec."""
     cast = scene["cast"]

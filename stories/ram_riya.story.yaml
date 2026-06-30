@@ -1,0 +1,39 @@
+# Ram & Riya — the worked example for the live-MCP "story -> video" pipeline.
+# Reproduces the garden conversation: Ram (NK's cloned voice) and Riya (Hindi female) face each
+# other, a Skill45-blue phone between them, each lip-syncing to their line.
+# Run order:
+#   1. <skill45video>/python.exe agent/assemble_story.py voices stories/ram_riya.story.yaml
+#   2. (agent, over MCP) import mcp_studio; mcp_studio.build_story(<voice/ram_riya/manifest.json>)
+#   3. <skill45video>/python.exe agent/assemble_story.py mux    stories/ram_riya.story.yaml
+title: ram_riya
+fps: 30
+aspect: 16x9
+
+background:
+  hdri: assets/hdri/residential_garden_2k.hdr
+  strength: 1.0
+
+characters:
+  ram:
+    blend: characters/cute_char.blend
+    x: -1.05
+    face: 22
+    voice: {engine: dots, ref: nk_hi.wav, lang: hi}
+  riya:
+    blend: characters/girl_char.blend
+    x: 1.05
+    face: -22
+    voice: {engine: orpheus, voice: "ऋतिका", lang: hi}
+
+props:
+  - {kind: phone, loc: [0.30, -0.55, 1.05], rot: [-10, 0, 20]}
+
+dialogue:
+  - {who: ram,  line: "अरे Riya! इतने ध्यान से क्या देख रही हो?", emotion: neutral}
+  - {who: riya, line: "मैं खुद को अपग्रेड कर रही हूँ, Skill45 पर।", emotion: happy}
+  - {who: ram,  line: "Skill45? ये क्या है?", emotion: neutral}
+  - {who: riya, line: "सिर्फ़ पैंतालीस रुपये में, पैंतालीस दिन की लर्निंग।", emotion: happy}
+
+endcard:
+  seconds: 3
+  source: skill45

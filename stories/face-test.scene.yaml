@@ -1,0 +1,24 @@
+# Face skeleton test (anim-studio M3) — ONE VRM character that talks + shows emotion.
+# Needs: VRM Add-on for Blender enabled + a CC0 .vrm at assets/characters/vrm/char01.vrm.
+# Run:  <skill45video>/python.exe build_scene.py stories/face-test.scene.yaml --aspects 16x9
+# Expect: log "[face] hero: morphs [A, happy, ...]", mouth opens/closes with speech, face smiles.
+title: "Face test — one VRM character"
+fps: 30
+aspects: [16x9]
+
+positions:
+  center: {loc: [0, 0, 0], face: 180}   # full face to camera so the mouth/expression are visible
+
+cast:
+  hero:
+    model: ../characters/riya/skelton.vrm   # sphere/ico test export — proves the mesh renders (no blendshapes)
+    voice: {engine: dots, lang: en, ref: nk_en.wav}   # your cloned voice (EN); ref under dots-pilot/
+
+shots:
+  - id: f1
+    camera: {shot: medium, on: [hero]}
+    cast:
+      - {who: hero, at: center}          # no `action:` -> static body; this test is about the FACE
+    dialogue:
+      - {who: hero, line: "Hi! I am your new animated host.", emotion: happy}
+      - {who: hero, line: "Watch my mouth move as I speak.", emotion: neutral}

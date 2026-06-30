@@ -1,0 +1,12 @@
+{
+  "_comment": "Face metadata for girl_char.blend (the girl, e.g. Riya). Object names are UNPREFIXED, as they exist in the .blend; mcp_studio applies the per-character prefix at load time. Lip-sync keyframes the lips' object location.z from a FIXED rest (never the animated value). Blink scales the listed eye objects on Z.",
+  "head": "head",
+  "upper_lip": "upper_lip",
+  "lower_lip": "lower_lip",
+  "rest_upper_z": 1.413,
+  "rest_lower_z": 1.347,
+  "open_up": 0.006,
+  "open_down": 0.030,
+  "gain": 1.5,
+  "eyes": ["pupil", "pupil.001", "Sphere.004", "Sphere.005", "Sphere.007", "Sphere.008"]
+}

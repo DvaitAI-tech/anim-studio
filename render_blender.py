@@ -23,6 +23,7 @@ from mathutils import Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from studiolib import (append_character, bind_action, clothe_body, colored_mat, find_armature,
                        import_model, recolor_meshes, shift_action_to_frame1, world_bbox)
+from studiolib import face as facelib
 from studiolib.geometry import angle_to_face
 
 
@@ -377,6 +378,34 @@ def frame_camera(targets_bbox, aspect, shot, move, frame_start, frame_end):
     return cam
 
 
+def drive_faces(placed, spec, fps):
+    """Animate VRM faces: amplitude lip-sync + emotion expression per dialogue line (M3).
+
+    Reads spec['face'] = [{who, frame_start, frame_end, envelope, emotion}]. For each character with
+    shape-key (VRM) face meshes, modulate the mouth viseme by the envelope and hold the emotion
+    blendshape over the line. No-op for body-only rigs (no shape keys) or scenes with no 'face' key,
+    so existing Quaternius scenes render exactly as before.
+    """
+    entries = spec.get("face") or []
+    if not entries:
+        return
+    shot_end = max(2, int(spec.get("frames", 1)))
+    for who, (empty, objs, meshes) in placed.items():
+        fmeshes = facelib.find_face_meshes(objs)
+        if not fmeshes:
+            continue
+        mine = [e for e in entries if e.get("who") == who]
+        for mesh in fmeshes:
+            morphs = facelib.resolve_morphs(mesh)
+            print(f"   [face] {who}: morphs {morphs['found'] or 'NONE'}", flush=True)
+            facelib.idle_blink(mesh, morphs, 1, shot_end, fps)
+            for e in mine:
+                facelib.keyframe_mouth(mesh, morphs, e.get("envelope") or [],
+                                       int(e["frame_start"]), fps)
+                facelib.keyframe_expression(mesh, morphs, e.get("emotion"),
+                                            int(e["frame_start"]), int(e["frame_end"]))
+
+
 def render_shot(spec):
     """Render one shot (multi-character, framed camera, N frames) to a silent mp4."""
     reset_scene()
@@ -442,8 +471,10 @@ def render_shot(spec):
                 empty.rotation_euler = (0.0, 0.0, math.radians(
                     angle_to_face(d.x, d.y) + float(spec.get("walk_face_offset", 0.0))))
 
-        # Clothing/skin: baked assets already carry it; only paint un-baked ones here.
-        if not prebuilt:
+        # Clothing/skin: baked assets already carry it; VRM characters carry their OWN textures
+        # (recoloring would flatten them) — only paint un-baked, non-VRM characters here.
+        is_vrm = str(c.get("model", "")).lower().endswith(".vrm")
+        if not prebuilt and not is_vrm:
             skin = c.get("color") or (0.80, 0.62, 0.50)
             cl = c.get("clothes")
             if not (cl and char_arm and clothe_body(meshes, char_arm, cl.get("kind", "casual"), skin,
@@ -457,6 +488,23 @@ def render_shot(spec):
             keyframe_walk(empty, at["loc"], positions[c["to"]]["loc"], fstart, fend)
         placed[c["who"]] = (empty, new, meshes)
         all_meshes += meshes
+
+    # --- diagnostic: what actually landed in the scene (helps debug invisible/black renders) ---
+    for who, (empty, objs, meshes) in placed.items():
+        vis = sum(1 for m in meshes if not m.hide_render)
+        verts = sum(len(m.data.vertices) for m in meshes)
+        mats = sorted({mat.name for m in meshes for mat in m.data.materials if mat})
+        if meshes:
+            mn, mx = world_bbox(meshes)
+            sz = mx - mn
+            print(f"   [diag] {who}: {len(meshes)} meshes ({vis} render-visible), {verts} verts, "
+                  f"bbox=({sz.x:.2f},{sz.y:.2f},{sz.z:.2f}) at z[{mn.z:.2f}..{mx.z:.2f}] "
+                  f"mats={mats[:6]}", flush=True)
+        else:
+            print(f"   [diag] {who}: NO MESHES (objs={[o.name+':'+o.type for o in objs][:8]})", flush=True)
+
+    # VRM facial animation: amplitude lip-sync + emotion (no-op for body-only rigs / no face block)
+    drive_faces(placed, spec, int(spec.get("fps", 30)))
 
     # a seat the characters sit on (scene-level prop)
     bench = spec.get("bench")
