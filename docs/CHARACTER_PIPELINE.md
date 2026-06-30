@@ -50,10 +50,10 @@ The agent then reads the validation report + `preview.png` and, if something's o
 edits the recipe) and rebuilds — a deterministic, headless loop. **Adding wardrobe later** = add an entry
 under `outfits:` (or a clothed/textured body with `textured: true`); no code change.
 
-## Run it (NK runs; per the hand-over rule)
+## Run it
 Build (headless):
 ```powershell
-cd "C:\Users\ZENITHRA_MK\Music\NK\Projects\anim-studio"
+cd path/to/anim-studio
 $env:PYTHONUTF8 = "1"
 python build_character.py characters/riya/character.yaml
 ```
@@ -102,7 +102,7 @@ with the existing animations — no re-weighting, no retargeting. "Change clothe
 The cleanest free source that fits our setup: **Quaternius Modular Character Outfits** (CC0) — rigged to the
 *same Universal rig + Universal Animation Library* we already use.
 
-**Download (NK runs — hand-over rule):**
+**Download (one-time, local — assets are gitignored):**
 1. Get **Quaternius Modular Character Outfits** (CC0): https://quaternius.com (or https://quaternius.itch.io).
    Grab the **FBX** (or glTF) version.
 2. Put an outfit file in `assets/outfits/`, e.g. `assets/outfits/Outfit_A.fbx`.
@@ -123,7 +123,7 @@ The painted-nude-base look has a low ceiling. For real anime-style characters (f
 toon textures), make them in **VRoid Studio** (free) and import the **.vrm** — the pipeline keeps the
 VRoid materials (`textured: true`), so no painting.
 
-**One-time setup (NK runs — hand-over rule):**
+**One-time setup (local):**
 1. Install **VRoid Studio** (free): https://vroid.com/en/studio
 2. Install the free **VRM Add-on for Blender**: https://vrm-addon-for-blender.info/en/
    — download the .zip, then in Blender: *Edit → Preferences → Add-ons → Install…* → pick the zip → tick it on.

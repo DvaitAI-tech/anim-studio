@@ -5,7 +5,7 @@ a voiced, lip-synced, multi-character animated video — by following this one d
 the recipe each time. The pattern was lifted verbatim from the Ram & Riya garden video.
 
 **What it produces.** Our own primitive `.blend` characters, placed in a scene facing each other,
-each lip-syncing to its spoken line (NK's cloned voice and/or a Hindi female voice), over an HDRI
+each lip-syncing to its spoken line (a cloned voice and/or a Hindi female voice), over an HDRI
 backdrop, with an optional prop and a Skill45 end card → `out/<title>.mp4`.
 
 **What an agent needs (the contract):**
@@ -30,11 +30,36 @@ That's the whole plug surface. If an agent has both, it can run the pattern.
 Run them in order. Stage 2 writes a self-contained `voice/<title>/manifest.json`; stage 3 reads it
 and renders the silent video; stage 4 muxes the voices + appends the end card.
 
-The `skill45video` Python (used for stages 0, 2, 4):
+```mermaid
+flowchart LR
+  Y["story.yaml<br/>(author)"] --> V["assemble_story.py voices<br/>(shell · skill45video)"]
+  V --> M["voice/&lt;title&gt;/manifest.json<br/>wav · dur · env · offset · frames"]
+  M --> BS["mcp_studio.build_story(manifest)<br/>(Blender MCP · execute_blender_code)"]
+  subgraph BL ["inside Blender (every gotcha baked in)"]
+    direction TB
+    RS["reset_scene (read_homefile)"] --> HD["set_hdri (shader nodes)"]
+    HD --> PC["place_character ×N (append + prefix-rename + face)"]
+    PC --> PR["add_phone / props"]
+    PR --> LS["lipsync (fixed rest-Z) + idle_blink"]
+    LS --> RR["render_silent (fps=30, EEVEE)"]
+  end
+  BS --> BL
+  BL --> SIL["out/&lt;title&gt;.silent.mp4"]
+  SIL --> MX["assemble_story.py mux<br/>(shell)"]
+  M --> MX
+  MX --> AD["adelay + amix voices at offsets"]
+  AD --> EC["append Skill45 end card (thumbnail.py, fade)"]
+  EC --> O["out/&lt;title&gt;.mp4"]
 ```
-C:\Users\ZENITHRA_MK\.conda\envs\skill45video\python.exe
-```
-All shell commands run from the project root: `C:\Users\ZENITHRA_MK\Music\NK\Projects\anim-studio`.
+
+**Conventions used below** (substitute your own):
+- `<ANIM_STUDIO>` — the absolute path to your repo checkout (e.g. `/home/you/anim-studio` or
+  `C:\dev\anim-studio`). All shell commands run from there.
+- **the skill45video Python** — `python.exe` from the `skill45video` conda env. On Windows that is
+  typically `%USERPROFILE%\.conda\envs\skill45video\python.exe` (the commands below use the
+  `$env:USERPROFILE` form so they work on any machine). Paths to ffmpeg / Blender / the genai env are
+  overridable via the `SKILL45_FFMPEG` / `SKILL45_FFPROBE` / `SKILL45_BLENDER` / `SKILL45_DOTS_PYTHON`
+  environment variables (see `check_tools.py`).
 
 ---
 
@@ -93,10 +118,9 @@ the resolved scene). Sanity: each line prints `frames=<N>` and `dur`; `frame_end
 Send **exactly this** through `mcp__blender__execute_blender_code` (fix the two absolute paths):
 ```python
 import sys, importlib
-sys.path.insert(0, r"C:\Users\ZENITHRA_MK\Music\NK\Projects\anim-studio\agent")
+sys.path.insert(0, r"<ANIM_STUDIO>\agent")          # <- your repo checkout
 import mcp_studio; importlib.reload(mcp_studio)
-print(mcp_studio.build_story(
-    r"C:\Users\ZENITHRA_MK\Music\NK\Projects\anim-studio\voice\ram_riya\manifest.json"))
+print(mcp_studio.build_story(r"<ANIM_STUDIO>\voice\ram_riya\manifest.json"))
 ```
 It prints a JSON summary like `{"ok": true, "out_silent": "...out/ram_riya.silent.mp4", ...}`.
 Then **verify visually**:

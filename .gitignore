@@ -30,11 +30,19 @@ media/
 *.wav
 *.mp3
 
-# Built character bakes — keep the recipe (character.yaml), ignore heavy outputs
+# Built character bakes — keep the recipe (character.yaml) + *.face.json, ignore heavy outputs
 characters/*/character.blend
 characters/*/preview.png
 characters/*/character.resolved.json
+characters/*/character.resolved.yaml
 characters/*/_build.spec.json
+
+# VRoid / VRM exports (NK's, binary, regenerable) — *.face.json sidecars stay tracked (small recipe)
+*.vrm
+
+# Caption sidecars + scratch test specs (regenerable / local-only)
+*.srt
+_test_*.json
 
 # Python
 __pycache__/

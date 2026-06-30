@@ -167,6 +167,48 @@ clip; base bodies are recolored/painted, not textured.
 
 ---
 
+## 5b. Live-MCP story pipeline (the *other* path)
+
+A second, independent pipeline makes talking-head videos from **our own primitive `.blend`
+characters** (Ram/Riya) with **working amplitude lip-sync** — the path the Ram & Riya garden video
+used. Instead of a headless subprocess, an **agent drives Blender live over the MCP**. It is a
+**plug-any-agent** contract: any agent with the Blender MCP + a shell can run it from one doc
+([`../agent/AGENT_PLAYBOOK.md`](../agent/AGENT_PLAYBOOK.md)). Input is `*.story.yaml`
+([`../agent/story.schema.md`](../agent/story.schema.md)), not `*.scene.yaml`. The two pipelines
+don't mix — this one targets primitive characters whose lips are separate `upper_lip`/`lower_lip`
+objects described by a `<stem>.face.json` sidecar.
+
+```mermaid
+flowchart TB
+  Y["*.story.yaml"] --> VC["assemble_story.py voices (shell)"]
+  VC -->|reuses| VR["voices.synth_dots/orpheus + extract_envelope"]
+  VR --> MAN["voice/&lt;title&gt;/manifest.json<br/>per-line wav · dur · env · offset · frames + scene"]
+  MAN --> MCP["mcp_studio.build_story(manifest)<br/>(Blender MCP execute_blender_code)"]
+  subgraph IN ["inside Blender — gotchas encapsulated"]
+    direction TB
+    R1["reset_scene: read_homefile(use_empty) — NOT read_factory_settings"]
+    R1 --> R2["set_hdri: shader nodes (Poly Haven MCP dies post-reset)"]
+    R2 --> R3["place_character ×N: append + prefix-rename + face"]
+    R3 --> R4["lipsync: keyframe lip Z from FIXED rest-Z + idle_blink"]
+    R4 --> R5["render_silent: force fps=30 (else 24fps desync)"]
+  end
+  MCP --> IN
+  IN --> SIL["out/&lt;title&gt;.silent.mp4"]
+  SIL --> MX["assemble_story.py mux (shell)"]
+  MAN --> MX
+  MX -->|reuses build_scene filter| AX["adelay + amix at offsets"]
+  AX --> ECC["append Skill45 end card (thumbnail.py, 0.5s fade)"]
+  ECC --> OUT["out/&lt;title&gt;.mp4"]
+```
+
+Reuses from the subprocess pipeline: `voices.synth_dots/synth_orpheus/extract_envelope`, the
+`assemble`-style `adelay`+`amix` mux filter, `../skill45-video/thumbnail.py` (brand end card).
+New code lives under `agent/`; per-character face metadata in `characters/<stem>.face.json`.
+**Capability check** (`agent/check_tools.py` + 3 MCP probes) gates whether a given agent can run it.
+**Honest limit:** amplitude lip-sync is a mouth-flap, not phoneme-accurate; one fixed two-shot camera.
+
+---
+
 ## 6. File / function reference
 
 | File (env) | Key functions | Role |
@@ -176,6 +218,9 @@ clip; base bodies are recolored/painted, not textured.
 | `make_voice.py` (genai) | `--text/--out` (single), `--jobs` (batch), `postprocess` | dots.tts generation in NK's cloned voice; trim silence + RMS-normalize |
 | `render_blender.py` (Blender python) | `render_shot`, `place_character`, `bind_action`, `shift_action_to_frame1`, `preload_actions`, `clothe_body`, `recolor_meshes`, `add_bench`, `loop_action`, `keyframe_walk`, `frame_camera`, `configure_render`, `set_world_hdri` | Headless shot renderer (shot-mode). Also keeps M0 single-`--model` mode in `main`. |
 | `orpheus_mv.py` (../skill45-video) | `OrpheusService`, `clean_devanagari`, `SR` | Reused as-is for the ऋतिका Hindi voice |
+| `agent/assemble_story.py` (skill45video) | `stage_voices`, `stage_mux`, `_make_endcard` | **Live-MCP path** host stages: synth→manifest, then mux + end card |
+| `agent/mcp_studio.py` (Blender python, via MCP) | `build_story`, `reset_scene`, `set_hdri`, `place_character`, `add_phone`, `lipsync`, `idle_blink`, `render_silent` | **Live-MCP path** bpy toolkit — composes + lip-syncs + renders silent; every gotcha baked in |
+| `agent/check_tools.py` (skill45video) | capability self-test | Stage-0 gate: envs/ffmpeg/Blender/assets PASS-FAIL (+ 3 MCP probes in the playbook) |
 
 Run commands and prerequisites are in [`../README.md`](../README.md); the input format is in
 [`../scene.schema.md`](../scene.schema.md).

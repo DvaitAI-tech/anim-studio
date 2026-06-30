@@ -12,6 +12,7 @@ voice and sits at a consistent level (dots is a raw AR model — see dots-tts-vo
 import argparse
 import json
 import os
+from pathlib import Path
 
 import numpy as np
 import soundfile as sf
@@ -19,7 +20,11 @@ import torch
 
 from dots_tts.runtime import DotsTtsRuntime
 
-_DEF_MODEL = r"C:\Users\ZENITHRA_MK\Music\NK\Projects\dots-pilot\models\dots.tts-soar"
+# dots.tts checkpoint. Override with DOTS_TTS_MODEL; default = ../dots-pilot/models/dots.tts-soar
+# (sibling checkout). See the dots-tts voice-pilot notes for how to obtain/clone a voice model.
+_DEF_MODEL = os.environ.get(
+    "DOTS_TTS_MODEL",
+    str(Path(__file__).resolve().parent.parent / "dots-pilot" / "models" / "dots.tts-soar"))
 
 
 def postprocess(audio, sr, target_rms=0.10, peak=0.97, pad_ms=60):

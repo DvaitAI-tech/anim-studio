@@ -2,10 +2,12 @@
 # Run from the anim-studio folder:  .\build_proof.ps1
 $ErrorActionPreference = "Stop"
 
-$studio = "C:\Users\ZENITHRA_MK\Music\NK\Projects\anim-studio"
+# $studio defaults to this script's own folder; voice ref defaults to a sibling dots-pilot checkout.
+# Override either by setting $env:ANIM_STUDIO / $env:DOTS_REF before running.
+$studio = if ($env:ANIM_STUDIO) { $env:ANIM_STUDIO } else { $PSScriptRoot }
 $genai  = "$env:USERPROFILE\.conda\envs\genai\python.exe"
 $ff     = "$env:USERPROFILE\.conda\envs\skill45video\Library\bin\ffmpeg.exe"
-$ref    = "C:\Users\ZENITHRA_MK\Music\NK\Projects\dots-pilot\nk_en.wav"
+$ref    = if ($env:DOTS_REF) { $env:DOTS_REF } else { "$studio\..\dots-pilot\nk_en.wav" }
 $voice  = "$studio\voice\proof_en.wav"
 $line   = "Forty-five rupees. Forty-five days. Three lessons a day. This is Skill45."
 

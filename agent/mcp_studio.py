@@ -4,9 +4,9 @@ This module runs INSIDE Blender. An agent sends a tiny bootstrap through
 `mcp__blender__execute_blender_code`:
 
     import sys
-    sys.path.insert(0, r"C:\\Users\\ZENITHRA_MK\\Music\\NK\\Projects\\anim-studio\\agent")
+    sys.path.insert(0, r"<ANIM_STUDIO>/agent")          # <ANIM_STUDIO> = your repo checkout
     import mcp_studio, importlib; importlib.reload(mcp_studio)
-    print(mcp_studio.build_story(r"<abs path to voice/<title>/manifest.json>"))
+    print(mcp_studio.build_story(r"<ANIM_STUDIO>/voice/<title>/manifest.json"))
 
 `build_story` composes the characters, faces them, adds props, drives amplitude
 lip-sync from the per-line envelopes, sets fps, and renders a SILENT mp4. The host
